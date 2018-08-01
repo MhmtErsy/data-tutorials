@@ -22,8 +22,6 @@ This tutorial will get you started with a couple of Spark REPL examples
 -   How to run Spark word count examples
 -   How to use SparkR
 
-You can choose to either use Spark 1.6.x or Spark 2.x API examples.
-
 ## Prerequisites
 
 This tutorial assumes that you are running an HDP Sandbox.
@@ -41,7 +39,7 @@ Please ensure you complete the prerequisites before proceeding with this tutoria
 -   [Further Reading](#further-reading)
 
 
-## WordCount Example
+## A Dataset WordCount Example
 
 **Copy input file for Spark WordCount Example**
 
@@ -60,10 +58,6 @@ cd /usr/hdp/current/spark2-client/
 hdfs dfs -copyFromLocal /etc/hadoop/conf/log4j.properties /tmp/data.txt
 ~~~
 
-**Spark 2.x Version**
-
-Here's an example of a WordCount in Spark 2.x. (For Spark 1.6.x scroll down.)
-
 **Run the Spark shell:**
 
 ~~~ bash
@@ -77,10 +71,10 @@ Welcome to
       ____              __
      / __/__  ___ _____/ /__
     _\ \/ _ \/ _ `/ __/  '_/
-   /___/ .__/\_,_/_/ /_/\_\   version 2.2.0.2.6.4.0-91
+   /___/ .__/\_,_/_/ /_/\_\   version 2.3.1.3.0.0.0-1634
       /_/
 
-Using Scala version 2.11.8 (OpenJDK 64-Bit Server VM, Java 1.8.0_161)
+Using Scala version 2.11.8 (OpenJDK 64-Bit Server VM, Java 1.8.0_181)
 Type in expressions to have them evaluated.
 Type :help for more information.
 
@@ -112,7 +106,7 @@ Show results
 counts.show()
 ~~~
 
-You should see the following output
+You should see the following output:
 
 ~~~ bash
 +--------------------+--------+
@@ -142,48 +136,13 @@ You should see the following output
 only showing top 20 rows
 ~~~
 
-**Spark 1.6.x Version**
-
-Here's how to run a WordCount example in Spark 1.6.x
-
-**Run the Spark shell:**
-
-If you haven't already, switch to user *spark*:
-
-~~~ bash
-su spark
-~~~
-
-Next,
-
-~~~ bash
-cd /usr/hdp/current/spark-client/
-./bin/spark-shell 
-~~~
-
-Output similar to the following will be displayed, followed by a `scala>` REPL prompt:
-
-~~~ bash
-Welcome to
-     ____              __
-    / __/__  ___ _____/ /__
-   _\ \/ _ \/ _ `/ __/  '_/
-  /___/ .__/\_,_/_/ /_/\_\   version 1.6.2
-     /_/
-Using Scala version 2.10.5 (OpenJDK 64-Bit Server VM, Java 1.7.0_101)
-Type in expressions to have them evaluated.
-Type :help for more information.
-15/12/16 13:21:57 INFO SparkContext: Running Spark version 1.6.2
-...
-
-scala>
-~~~
+## An RDD WordCount Example
 
 At the `scala` REPL prompt enter:
 
 ~~~ js
-val file = sc.textFile("/tmp/data.txt")
-val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
+val file = sc.textFile("/tmp/data.txt")
+val counts = file.flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey(_ + _)
 ~~~
 
 Save `counts` to a file:
@@ -192,10 +151,7 @@ Save `counts` to a file:
 counts.saveAsTextFile("/tmp/wordcount")
 ~~~
 
-**Viewing the WordCount output with Scala Shell**
-
-
-To view the output, at the `scala>` prompt type:
+To view the output in the shell type:
 
 ~~~ js
 counts.count()
@@ -204,39 +160,38 @@ counts.count()
 You should see an output screen similar to:
 
 ~~~ js
-...
-16/02/25 23:12:20 INFO DAGScheduler: Job 1 finished: count at <console>:32, took 0.541229 s
-res1: Long = 341
-
-scala>
+res2: Long = 364
 ~~~
 
 To print the full output of the WordCount job type:
 
 ~~~ js
-counts.toArray().foreach(println)
+counts.take(10).foreach(println)
 ~~~
 
 You should see an output screen similar to:
 
 ~~~ js
-...
-((Hadoop,1)
-(compliance,1)
-(log4j.appender.RFAS.layout.ConversionPattern=%d{ISO8601},1)
-(additional,1)
-(default,2)
-
-scala>
+(Application,1)                                                                                               
+(log4j.logger.org.apache.hadoop.yarn.server.resourcemanager.RMAppManager$ApplicationSummary=${yarn.server.reso
+urcemanager.appsummary.logger},1)                                                                             
+(Unless,1)                                                                                                    
+(this,4)                                                                                                      
+(hadoop.mapreduce.jobsummary.log.file=hadoop-mapreduce.jobsummary.log,1)                                      
+(log4j.appender.RFA.layout.ConversionPattern=%d{ISO8601},2)                                                   
+(AppSummaryLogging,1)                                                                                         
+(log4j.appender.RMAUDIT.layout=org.apache.log4j.PatternLayout,1)                                              
+(log4j.appender.DRFAAUDIT.layout=org.apache.log4j.PatternLayout,1)                                            
+(under,4)
 ~~~
 
 **Viewing the WordCount output with HDFS**
 
 To read the output of WordCount using HDFS command:
-Exit the Scala shell.
+Exit the Scala shell:
 
 ~~~ bash
-exit
+:quit
 ~~~
 
 View WordCount Results:
@@ -259,74 +214,48 @@ Use the HDFS `cat` command to see the WordCount output. For example,
 hdfs dfs -cat /tmp/wordcount/part-00000
 ~~~
 
-
-
 ## SparkR Example
 
-**Spark 1.6.x Version**
-
-**Prerequisites**
-
-Before you can run SparkR, you need to install R linux distribution by following these steps as a `root` user:
+**Install R**
+Before proceeding, make sure that R is installed.
+As `root`:
 
 ~~~ bash
-cd /usr/hdp/current/spark-client
+cd /usr/hdp/current/spark2-client
 sudo yum update
 sudo yum install R
 ~~~
 
-Switch to user *spark*:
+If you haven't done so already in previous sections, make sure to move *people.json* to HDFS:
+
+~~~ bash
+hdfs dfs -copyFromLocal examples/src/main/resources/people.json /tmp/people.json
+~~~
+
+**Launch SparkR**
+
+Switch to *spark* user:
 
 ~~~ bash
 su spark
 ~~~
 
-**Upload data set**
-
-If you haven't done so already in previous sections, make sure to upload *people.json* to HDFS:
-
-~~~ bash
-hdfs dfs -copyFromLocal examples/src/main/resources/people.json /tmp/people.json
-~~~
-
-**Launch SparkR**
+Start SparkR:
 
 ~~~ bash
 ./bin/sparkR
 ~~~
 
-You should see an output similar to the following:
+First, create a DataFrame using sample dataset `faithful`:
 
 ~~~ js
-...
-Welcome to
-   ____              __
-  / __/__  ___ _____/ /__
- _\ \/ _ \/ _ `/ __/  '_/
-/___/ .__/\_,_/_/ /_/\_\   version  1.6.2
-   /_/
-
-
-Spark context is available as sc, SQL context is available as sqlContext
->
-~~~
-
-Initialize SQL context:
-
-~~~ js
-sqlContext <- sparkRSQL.init(sc)
-~~~
-
-Create a DataFrame:
-
-~~~ js
-df <- createDataFrame(sqlContext, faithful)
+df1 <- createDataFrame(faithful)
 ~~~
 
 List the first few lines:
 
 ~~~ js
-head(df)
+head(df1)
 ~~~
 
 You should see an output similar to the following:
@@ -343,34 +272,33 @@ eruptions waiting
 >
 ~~~
 
-Create people DataFrame from 'people.json':
+Now, create another DataFrame from `people.json` dataset:
 
 ~~~ js
-people <- read.df(sqlContext, "/tmp/people.json", "json")
+df2 <- read.df("/tmp/people.json", "json")
 ~~~
 
 List the first few lines:
 
 ~~~ js
-head(people)
+head(df2)
 ~~~
 
 You should see an output similar to the following:
 
 ~~~ js
-...
-age    name
+  age    name
 1  NA Michael
 2  30    Andy
 3  19  Justin
 ~~~
 
-For additional SparkR examples, see https://spark.apache.org/docs/latest/sparkr.html.
+For more SparkR examples see https://spark.apache.org/docs/latest/sparkr.html
 
-To exit SparkR type:
+To exit type:
 
 ~~~ js
-quit()
+q()
 ~~~
 
 ## Next steps
