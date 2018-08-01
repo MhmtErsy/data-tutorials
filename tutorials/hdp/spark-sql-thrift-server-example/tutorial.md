@@ -34,17 +34,17 @@ SparkSQL’s thrift server provides JDBC access to SparkSQL.
 
 **Create logs directory**
 
-Once logged in the sandbox terminal (command line), change ownership of `logs` directory from `root` to `spark` user:
+As `root`:
 
 ~~~ bash
-cd /usr/hdp/current/spark-client
+cd /usr/hdp/current/spark2-client
+mkdir logs
 chown spark:hadoop logs
 ~~~
 
 **Start Thrift Server**
 
 ~~~ bash
-su spark
 ./sbin/start-thriftserver.sh --master yarn-client --executor-memory 512m --hiveconf hive.server2.thrift.port=10015
 ~~~
 
@@ -64,20 +64,19 @@ On the `beeline>` prompt type:
 !connect jdbc:hive2://localhost:10015
 ~~~
 
-***Notes***
-- This example does not have security enabled, so any username-password combination should work.
-- The connection may take a few seconds to be available in a Sandbox environment.
+When prompted for username and password just press `enter`.
 
 You should see an output similar to the following:
 
 ~~~
+Beeline version 1.21.2.3.0.0.0-1634 by Apache Hive
 beeline> !connect jdbc:hive2://localhost:10015
 Connecting to jdbc:hive2://localhost:10015
 Enter username for jdbc:hive2://localhost:10015:
 Enter password for jdbc:hive2://localhost:10015:
 ...
-Connected to: Spark SQL (version 1.6.2)
-Driver: Spark Project Core (version 1.6.1.2.5.0.0-817)
+Connected to: Spark SQL (version 2.3.1.3.0.0.0-1634)
+Driver: Hive JDBC (version 1.21.2.3.0.0.0-1634)
 Transaction isolation: TRANSACTION_REPEATABLE_READ
 0: jdbc:hive2://localhost:10015>
 ~~~
@@ -91,18 +90,17 @@ show tables;
 You should see an output similar to the following:
 
 ~~~ bash
-+------------+--------------+--+
-| tableName  | isTemporary  |
-+------------+--------------+--+
-| sample_07  | false        |
-| sample_08  | false        |
-| testtable  | false        |
-+------------+--------------+--+
-3 rows selected (2.399 seconds)
++-----------+------------+--------------+--+
+| database  | tableName  | isTemporary  |
++-----------+------------+--------------+--+
++-----------+------------+--------------+--+
+No rows selected (0.278 seconds)                                                                                         
 0: jdbc:hive2://localhost:10015>
 ~~~
 
-Type `Ctrl+C` to exit beeline.
+Note that the table list is empty since there are no sample tables.
+
+Type `!exit` to exit beeline.
 
 **Stop Thrift Server**
 

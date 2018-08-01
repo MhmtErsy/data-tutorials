@@ -50,27 +50,21 @@ This tutorial will be using Spark 1.6.x. API syntax for all the examples.
 
 -   [Summary](#summary)
 
-## Getting the dataset
+## Getting started
 
-To begin, login to Hortonworks Sandbox through SSH:
-
-The default password is `hadoop`.
-
-Now let’s download the dataset with the command below:
+First, as `root` download a yahoo stocks dataset:
 
 ~~~ bash
 wget http://hortonassets.s3.amazonaws.com/tutorial/data/yahoo_stocks.csv
 ~~~
 
-and copy the downloaded file to HDFS:
+next, copy the downloaded file to HDFS:
 
 ~~~ bash
 hdfs dfs -put ./yahoo_stocks.csv /tmp/
 ~~~
 
-## Starting the Spark shell
-
-Use the command below to launch the Scala REPL for Apache Spark:
+Now launch a Spark Scala REPL:
 
 ~~~ bash
 spark-shell
@@ -80,20 +74,12 @@ Notice it is already starting with Hive integration as we have preconfigured it 
 
 Before we get started with the actual analytics let's import some of the libraries we are going to use below.
 
-~~~ java
+~~~ bash
 import org.apache.spark.sql.hive.orc._
 import org.apache.spark.sql._
 ~~~
 
-## Creating HiveContext
-
-HiveContext is an instance of the Spark SQL execution engine that integrates with data stored in Hive. The more basic SQLContext provides a subset of the Spark SQL support that does not depend on Hive. It reads the configuration for Hive from hive-site.xml on the classpath.
-
-~~~ java
-val hiveContext = new org.apache.spark.sql.hive.HiveContext(sc)
-~~~
-
-## Creating ORC tables
+## Create ORC tables
 
 ORC is a self-describing type-aware columnar file format designed for Hadoop workloads. It is optimized for large streaming reads and with integrated support for finding required rows fast. Storing data in a columnar format lets the reader read, decompress, and process only the values required for the current query. Because ORC files are type aware, the writer chooses the most appropriate encoding for the type and builds an internal index as the file is persisted.
 
@@ -102,7 +88,7 @@ Predicate pushdown uses those indexes to determine which stripes in a file need 
 Specifying `as orc` at the end of the SQL statement below ensures that the Hive table is stored in the ORC format.
 
 ~~~ java
-hiveContext.sql("create table yahoo_orc_table (date STRING, open_price FLOAT, high_price FLOAT, low_price FLOAT, close_price FLOAT, volume INT, adj_price FLOAT) stored as orc")
+spark.sql("create table yahoo_orc_table (date STRING, open_price FLOAT, high_price FLOAT, low_price FLOAT, close_price FLOAT, volume INT, adj_price FLOAT) stored as orc")
 ~~~
 
 ## Loading the file and creating a RDD
