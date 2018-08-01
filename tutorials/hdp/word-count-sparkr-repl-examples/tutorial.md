@@ -108,7 +108,7 @@ counts.show()
 
 You should see the following output:
 
-~~~ bash
+~~~
 +--------------------+--------+
 |               value|count(1)|
 +--------------------+--------+
